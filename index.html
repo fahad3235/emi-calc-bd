@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="EMI Calculator BD — a free, fully offline loan EMI calculator for Bangladesh. Reducing-balance EMI, amortization schedule, loan comparison.">
+<title>EMI Calculator BD — ইএমআই ক্যালকুলেটর</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">৳</span>
+    <h1 data-i18n="appTitle">EMI Calculator BD</h1>
+  </div>
+  <button id="langToggle" class="btn ghost" type="button">বাংলা</button>
+</header>
+
+<main>
+  <!-- ============ CALCULATOR ============ -->
+  <section class="card" id="calcCard">
+    <h2 data-i18n="calcTitle">Loan EMI Calculator</h2>
+    <form id="emiForm" novalidate>
+      <div class="grid2">
+        <label class="field">
+          <span data-i18n="loanAmount">Loan amount (BDT)</span>
+          <input id="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="1000000">
+        </label>
+        <label class="field">
+          <span data-i18n="annualRate">Annual interest rate (%)</span>
+          <input id="rate" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="10">
+        </label>
+        <label class="field">
+          <span data-i18n="tenure">Tenure</span>
+          <div class="tenure-row">
+            <input id="tenure" type="number" min="1" step="1" inputmode="numeric" placeholder="12">
+            <select id="tenureUnit">
+              <option value="months" data-i18n="months">Months</option>
+              <option value="years" data-i18n="years">Years</option>
+            </select>
+          </div>
+        </label>
+        <label class="field">
+          <span data-i18n="downPayment">Down payment (BDT, optional)</span>
+          <input id="down" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+        </label>
+      </div>
+      <p class="error" id="formError" role="alert" hidden></p>
+      <button type="submit" class="btn primary" data-i18n="calculate">Calculate</button>
+    </form>
+
+    <div id="results" class="results" hidden>
+      <div class="stat hero">
+        <span class="label" data-i18n="monthlyEmi">Monthly EMI</span>
+        <strong id="rEmi">—</strong>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><span class="label" data-i18n="principal">Principal</span><strong id="rPrincipal">—</strong></div>
+        <div class="stat"><span class="label" data-i18n="totalInterest">Total interest</span><strong id="rInterest">—</strong></div>
+        <div class="stat"><span class="label" data-i18n="totalPayable">Total payable</span><strong id="rTotal">—</strong></div>
+        <div class="stat"><span class="label" data-i18n="tenureOut">Tenure</span><strong id="rTenure">—</strong></div>
+      </div>
+
+      <h3 data-i18n="scheduleTitle">Amortization schedule</h3>
+      <div class="table-wrap">
+        <table id="scheduleTable">
+          <thead><tr>
+            <th data-i18n="colMonth">Month</th>
+            <th data-i18n="colEmi">EMI</th>
+            <th data-i18n="colPrincipal">Principal</th>
+            <th data-i18n="colInterest">Interest</th>
+            <th data-i18n="colBalance">Balance</th>
+          </tr></thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </div>
+      <button id="showMoreBtn" class="btn ghost" type="button" hidden></button>
+      <p class="hint" data-i18n="scheduleHint">EMI is rounded to the nearest taka; the final month is adjusted so the balance closes at exactly ৳0.</p>
+    </div>
+  </section>
+
+  <!-- ============ COMPARISON ============ -->
+  <section class="card" id="compareCard">
+    <h2 data-i18n="compareTitle">Compare two loans</h2>
+    <div class="grid2">
+      <fieldset class="panel">
+        <legend data-i18n="scenarioA">Loan A</legend>
+        <label class="field"><span data-i18n="loanAmount">Loan amount (BDT)</span><input id="cmpA-amount" type="number" min="1" step="1" placeholder="1000000"></label>
+        <label class="field"><span data-i18n="annualRate">Annual interest rate (%)</span><input id="cmpA-rate" type="number" min="0" max="100" step="0.01" placeholder="10"></label>
+        <label class="field"><span data-i18n="tenureMonths">Tenure (months)</span><input id="cmpA-tenure" type="number" min="1" max="360" step="1" placeholder="12"></label>
+      </fieldset>
+      <fieldset class="panel">
+        <legend data-i18n="scenarioB">Loan B</legend>
+        <label class="field"><span data-i18n="loanAmount">Loan amount (BDT)</span><input id="cmpB-amount" type="number" min="1" step="1" placeholder="1000000"></label>
+        <label class="field"><span data-i18n="annualRate">Annual interest rate (%)</span><input id="cmpB-rate" type="number" min="0" max="100" step="0.01" placeholder="12"></label>
+        <label class="field"><span data-i18n="tenureMonths">Tenure (months)</span><input id="cmpB-tenure" type="number" min="1" max="360" step="1" placeholder="12"></label>
+      </fieldset>
+    </div>
+    <p class="error" id="cmpError" role="alert" hidden></p>
+    <button id="compareBtn" class="btn primary" type="button" data-i18n="compareBtn">Compare</button>
+    <div id="cmpResults" class="cmp-results" hidden>
+      <table id="cmpTable">
+        <thead><tr><th></th><th data-i18n="scenarioA">Loan A</th><th data-i18n="scenarioB">Loan B</th></tr></thead>
+        <tbody>
+          <tr><td data-i18n="monthlyEmi">Monthly EMI</td><td id="cmpA-emi">—</td><td id="cmpB-emi">—</td></tr>
+          <tr><td data-i18n="totalInterest">Total interest</td><td id="cmpA-interest">—</td><td id="cmpB-interest">—</td></tr>
+          <tr><td data-i18n="totalPayable">Total payable</td><td id="cmpA-total">—</td><td id="cmpB-total">—</td></tr>
+        </tbody>
+      </table>
+      <p class="verdict" id="cmpVerdict"></p>
+    </div>
+  </section>
+
+  <!-- ============ SAVED SCENARIOS ============ -->
+  <section class="card" id="savedCard">
+    <h2 data-i18n="savedTitle">Saved scenarios</h2>
+    <div class="save-row">
+      <input id="scenarioName" type="text" maxlength="60" data-i18n-ph="scenarioNamePh" placeholder="e.g. Home loan — DBBL">
+      <button id="saveScenarioBtn" class="btn" type="button" data-i18n="saveBtn">Save current</button>
+    </div>
+    <p class="error" id="saveError" role="alert" hidden></p>
+    <ul id="scenarioList" class="scenario-list"></ul>
+    <p class="empty" id="scenarioEmpty" data-i18n="noSaved">No saved scenarios yet. Calculate a loan, then save it here.</p>
+  </section>
+</main>
+
+<footer>
+  <p data-i18n="disclaimer">Reducing-balance method. Many BD lenders quote flat-rate interest — flat-rate EMIs are lower per month but usually cost more overall. This tool is for estimation only, not financial advice.</p>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
